@@ -1,71 +1,39 @@
-'use client'
+"use client";
 
 /* Core */
-import { useState } from 'react'
+import { useEffect, useState } from "react";
 
 /* Instruments */
-import {
-  counterSlice,
-  useSelector,
-  useDispatch,
-  selectCount,
-  incrementAsync,
-  incrementIfOddAsync,
-} from '@/lib/redux'
-import styles from './counter.module.css'
+import { useSelector, useDispatch, selectCount } from "@/lib/redux";
+import axios from "axios";
+import ConsumerCards from "./ConsumerCards";
+import { Container, Grid, Typography } from "@mui/material";
 
 export const Counter = () => {
-  const dispatch = useDispatch()
-  const count = useSelector(selectCount)
-  const [incrementAmount, setIncrementAmount] = useState(2)
+  const dispatch = useDispatch();
+  const count = useSelector(selectCount);
+  const [incrementAmount, setIncrementAmount] = useState(2);
+  const [consumers, setConsumers] = useState([]);
+
+  const fetchConsumers = async () => {
+    const { data } = await axios.get("http://localhost:8080/api/v1/consumers");
+    setConsumers(data);
+  };
+
+  useEffect(() => {
+    fetchConsumers();
+  }, []);
 
   return (
-    <div>
-      <div className={styles.row}>
-        <button
-          className={styles.button}
-          aria-label="Decrement value"
-          onClick={() => dispatch(counterSlice.actions.decrement())}
-        >
-          -
-        </button>
-        <span className={styles.value}>{count}</span>
-        <button
-          className={styles.button}
-          aria-label="Increment value"
-          onClick={() => dispatch(counterSlice.actions.increment())}
-        >
-          +
-        </button>
-      </div>
-      <div className={styles.row}>
-        <input
-          className={styles.textbox}
-          aria-label="Set increment amount"
-          value={incrementAmount}
-          onChange={(e) => setIncrementAmount(Number(e.target.value ?? 0))}
-        />
-        <button
-          className={styles.button}
-          onClick={() =>
-            dispatch(counterSlice.actions.incrementByAmount(incrementAmount))
-          }
-        >
-          Add Amount
-        </button>
-        <button
-          className={styles.asyncButton}
-          onClick={() => dispatch(incrementAsync(incrementAmount))}
-        >
-          Add Async
-        </button>
-        <button
-          className={styles.button}
-          onClick={() => dispatch(incrementIfOddAsync(incrementAmount))}
-        >
-          Add If Odd
-        </button>
-      </div>
-    </div>
-  )
-}
+    <Container>
+      <Grid container spacing={4} >
+        <Grid item xs={12}>
+          <Typography variant="h4" >Consumers</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <ConsumerCards consumers={consumers} />
+        </Grid>
+      </Grid>
+    </Container>
+  );
+};
